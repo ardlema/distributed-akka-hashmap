@@ -37,8 +37,16 @@ object ApplicationBuild extends Build {
     "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/"
   )
 
+  val scalaTestVersion = "2.2.5"
+  val akkaVersion = "2.4.2"
+
   val customLibraryDependencies = Seq(
-    "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+    ("com.typesafe.akka" %% "akka-actor"                           % akkaVersion),
+    ("com.typesafe.akka" %% "akka-stream"             		          % akkaVersion),
+    ("com.typesafe.akka" %% "akka-http-experimental"               % akkaVersion),
+    ("com.typesafe.akka" %% "akka-http-spray-json-experimental"    % akkaVersion),
+    ("com.typesafe.akka" %% "akka-http-testkit"       		          % akkaVersion),
+      ("org.scalatest" %% "scalatest" % scalaTestVersion % "test")
   ).map(_.exclude(
     "org.slf4j", "slf4j-log4j12"
   ))
