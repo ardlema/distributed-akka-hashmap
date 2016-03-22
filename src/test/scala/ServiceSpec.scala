@@ -7,11 +7,14 @@ import org.scalatest._
 
 class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service {
   override def testConfigSource = "akka.loglevel = WARNING"
+
   override def config = testConfig
+
   override val logger = NoLogging
 
   val valueId = 1.toLong
-  val mapEntry = MapEntry(valueId, "1234")
+  val testValue = "1234"
+  val mapEntry = MapEntry(valueId, testValue)
 
   "Service" should "return a not found response when the key isn't in the map" in {
     Get(s"/map/$valueId") ~> routes ~> check {
@@ -20,6 +23,14 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
       //responseAs[MapEntry] shouldBe mapEntry
     }
   }
+
+    ignore should "put values in the map" in {
+      Post(s"/map", MapEntry(valueId, testValue)) ~> routes ~> check {
+        status shouldBe OK
+        contentType shouldBe `application/json`
+        //responseAs[IpPairSummary] shouldBe ipPairSummary
+      }
+    }
 }
 
 
