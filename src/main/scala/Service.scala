@@ -3,6 +3,7 @@ import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.{ActorMaterializer, Materializer}
@@ -24,22 +25,28 @@ trait Service extends Protocols {
 
   def config: Config
   val logger: LoggingAdapter
+  var hashmap = Map[Long, String]()
 
   val routes = {
     //TODO: Add logging
     pathPrefix("map") {
       (get & path(Segment)) {id =>
         complete {
-          getIdFromMap(id).map[ToResponseMarshallable] {
+          getIdFromMap(id.toLong).map[ToResponseMarshallable] {
             case Right(value) => value
-            case Left(errorMessage) => BadRequest -> errorMessage
+            case Left(errorCode) => errorCode match {
+              case NotFound.intValue => NotFound -> NotFound.defaultMessage
+              case _ => BadRequest -> StatusCode.int2StatusCode(errorCode).defaultMessage
+            }
+            }
           }
         }
       }
     }
-  }
 
-  def getIdFromMap(id: String): Future[Either[String, MapEntry]] = Future.successful(Right(MapEntry(id.toLong, "1234")))
+  def getIdFromMap(id: Long): Future[Either[Int, MapEntry]] =
+    hashmap.get(id).map(value => Future.successful(Right(MapEntry(id,
+      value)))) getOrElse Future.successful(Left(NotFound.intValue))
 }
 
 object AkkaHttpMicroservice extends App with Service {

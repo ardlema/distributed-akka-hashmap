@@ -13,11 +13,11 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   val valueId = 1.toLong
   val mapEntry = MapEntry(valueId, "1234")
 
-  "Service" should "respond to value request" in {
+  "Service" should "return a not found response when the key isn't in the map" in {
     Get(s"/map/$valueId") ~> routes ~> check {
-      status shouldBe OK
-      contentType shouldBe `application/json`
-      responseAs[MapEntry] shouldBe mapEntry
+      status shouldBe NotFound
+      contentType shouldBe `text/plain(UTF-8)`
+      //responseAs[MapEntry] shouldBe mapEntry
     }
   }
 }
